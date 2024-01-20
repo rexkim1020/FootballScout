@@ -82,7 +82,7 @@ function getFilteredPlayers(min1, max1, min2, max2) {
         });
 }
 
-const port = 3000;
+const port = process.env.PORT || 80;
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
