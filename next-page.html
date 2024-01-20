@@ -1,0 +1,89 @@
+<!-- next-page.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtered Players</title>
+</head>
+<body>
+    <h1>필터링된 선수</h1>
+
+    <div id="filteredPlayers"></div>
+    <script>
+        // URL에서 사용자 입력값을 가져오는 함수
+        function getURLParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 사용자 입력값을 추출하고 서버에 전송하는 함수
+        function fetchFilteredPlayers() {
+            const min1 = getURLParameter('min1');
+            const max1 = getURLParameter('max1');
+            const min2 = getURLParameter('min2');
+            const max2 = getURLParameter('max2');
+            const weightGoal = getURLParameter('weightGoal') || 1;
+            const weightAssist = getURLParameter('weightAssist') || 1;
+
+            // 콘솔 로그 추가
+            console.log('Min Fee:', min1, 'Max Fee:', max1, 'Min Minutes:', min2, 'Max Minutes:', max2, 'Weight Goal:', weightGoal, 'Weight Assist:', weightAssist);
+
+            // 서버에 GET 요청을 보내고 결과를 처리하는 로직 추가
+            fetch(`/next-page?min1=${min1}&max1=${max1}&min2=${min2}&max2=${max2}&weightGoal=${weightGoal}&weightAssist=${weightAssist}`)
+                .then(response => {
+                    console.log(response); // 서버 응답 확인
+                    return response.json();
+                })
+                .then(responseText => {
+                    console.log('Received filtered players:', responseText);
+                    displayFilteredPlayersInfo(responseText, weightGoal, weightAssist); // 수정된 부분: 데이터를 받아온 이후에 화면을 업데이트
+                })
+                .catch(error => {
+                    console.error('Error fetching filtered players:', error);
+                });
+        }
+
+        // 필터링된 선수들의 정보를 출력하는 함수
+        function displayFilteredPlayersInfo(filteredPlayers, weightGoal, weightAssist) {
+            const filteredPlayersDiv = document.getElementById('filteredPlayers');
+            filteredPlayersDiv.innerHTML = "";
+
+            console.log('Filtered Players:', filteredPlayers);
+
+            if (filteredPlayers.length > 0) {
+                // 새로운 부분: 선수 리스트 정렬
+                const sortedPlayers = filteredPlayers.sort((a, b) => {
+                    const scoreA = a.goal * weightGoal + a.assist * weightAssist;
+                    const scoreB = b.goal * weightGoal + b.assist * weightAssist;
+                    return scoreB - scoreA; // 내림차순 정렬
+                });
+
+                // 콘솔에 선수의 점수 확인
+                console.log('Sorted Players (Scores):', sortedPlayers.map(player => player.goal * weightGoal + player.assist * weightAssist));
+
+                const playersList = document.createElement('ul');
+                sortedPlayers.forEach(player => {
+                    const listItem = document.createElement('li');
+
+                    // 수정된 부분: 필요한 데이터에 따라 수정
+                    const playerName = player.name || player['name']; // 'name' 속성으로 수정
+
+                    console.log('Player Name:', playerName); // 콘솔에 선수 이름 확인
+
+                    listItem.textContent = `Name: ${playerName}`;
+                    playersList.appendChild(listItem);
+                });
+                filteredPlayersDiv.appendChild(playersList);
+            } else {
+                filteredPlayersDiv.innerHTML += "<p>조건에 맞는 선수가 없습니다.</p>";
+            }
+        }
+
+        // 페이지 로드 시 필터링 결과를 가져와서 표시
+        window.onload = fetchFilteredPlayers;
+    </script>
+</body>
+</html>

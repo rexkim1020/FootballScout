@@ -1,0 +1,88 @@
+<!-- main.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Filter</title>
+    <style>
+        /* 추가된 스타일: 버튼 클릭 시 그림자 효과 */
+        button:active {
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 추가된 스타일: 가중치가 2일 때 글씨 굵게 */
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>선수 필터</h1>
+    <form id="filterForm">
+        <label for="min1">돈의 최솟값:</label>
+        <input type="number" id="min1" name="min1" required>
+        
+        <label for="max1">돈의 최댓값:</label>
+        <input type="number" id="max1" name="max1" required>
+
+        <label for="min2">출전 시간의 최솟값:</label>
+        <input type="number" id="min2" name="min2" required>
+        
+        <label for="max2">출전 시간의 최댓값:</label>
+        <input type="number" id="max2" name="max2" required>
+        
+        <button type="button" id="goalButton" onclick="applyFilter('goal')">득점 가중치 적용</button>
+        <button type="button" id="assistButton" onclick="applyFilter('assist')">어시스트 가중치 적용</button>
+
+        <!-- 수정된 부분: '적용' 버튼 클릭 시 페이지 이동 -->
+        <button type="button" onclick="goToNextPage()">적용</button>
+    </form>
+
+    <script>
+        let weightGoal = 1;
+        let weightAssist = 1;
+
+        function applyFilter(filterType) {
+            // 가중치 설정
+            if (filterType === 'goal') {
+                weightGoal = weightGoal === 1 ? 2 : 1;
+                weightAssist = 1;
+                
+                // 버튼에 bold 클래스 추가/제거
+                document.getElementById('goalButton').classList.toggle('bold');
+                document.getElementById('assistButton').classList.remove('bold');
+            } else if (filterType === 'assist') {
+                weightGoal = 1;
+                weightAssist = weightAssist === 1 ? 2 : 1;
+
+                // 버튼에 bold 클래스 추가/제거
+                document.getElementById('goalButton').classList.remove('bold');
+                document.getElementById('assistButton').classList.toggle('bold');
+            }
+
+            // 수정된 부분: 가중치가 바뀔 때마다 필터링 결과 업데이트
+            updateFilteredPlayers();
+        }
+
+        // 수정된 부분: 페이지 이동 함수
+        function goToNextPage() {
+            // 사용자 입력값 가져오기
+            const min1 = document.getElementById('min1').value;
+            const max1 = document.getElementById('max1').value;
+            const min2 = document.getElementById('min2').value;
+            const max2 = document.getElementById('max2').value;
+
+            // 결과 페이지로 이동
+            window.location.href = `next-page.html?min1=${min1}&max1=${max1}&min2=${min2}&max2=${max2}&weightGoal=${weightGoal}&weightAssist=${weightAssist}`;
+        }
+        
+        // 추가된 부분: 가중치 버튼을 누를 때마다 필터링 결과를 다시 가져오기
+        function updateFilteredPlayers() {
+            fetchFilteredPlayers();
+        }
+    </script>
+</body>
+</html>
